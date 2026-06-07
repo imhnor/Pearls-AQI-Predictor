@@ -1,0 +1,32 @@
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+pip install pandas requests python-dotenv
+pip freeze > requirements.txt
+
+python -m pip install "hopsworks[python]"
+
+pip install python-dotenv
+python -m pip install -r requirements.txt
+
+python -m uvicorn api.main:app --reload
+
+python -m src.features.create_feature_group
+
+
+# AQI Predictor
+
+Simple AQI forecasting system using ML.
+
+## Run steps
+
+1. Fetch data
+python src/fetch_data.py
+
+2. Build features
+python src/features.py
+
+3. Train model
+python src/train.py
+
+4. Run app
+streamlit run app.py

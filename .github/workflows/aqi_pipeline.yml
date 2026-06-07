@@ -1,0 +1,43 @@
+name: AQI Pipeline
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every 1 hour
+  workflow_dispatch:
+
+jobs:
+  run-aqi:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fetch_data
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: python src/fetch_data.py
+
+      - name: Run features
+        run: python src/features.py
+
+      - name: Train model
+        run: python src/train.py
+
+      - name: Commit updated data + model
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add data/ models/
+          git commit -m "Auto AQI update" || echo "No changes"
+          git push
