@@ -34,3 +34,5 @@ streamlit run app.py
 python src/features.py
 python src/train.py
 python src/predict.py
+
+streamlit run app.py
