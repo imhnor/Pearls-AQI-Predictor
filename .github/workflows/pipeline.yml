@@ -1,0 +1,39 @@
+name: Hourly AQI Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 * * * *' 
+  workflow_dispatch:      # Manual trigger button (Testing ke liye)
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+      - name: Run Feature Pipeline
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: |
+          # Aapke project structure ke mutabiq
+          python src/pipeline.py 
+
+      - name: Run Training Pipeline (Optional)
+        
+        if: github.event_name == 'workflow_dispatch' 
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+        run: |
+          python src/train.py
